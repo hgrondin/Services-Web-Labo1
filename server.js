@@ -32,6 +32,12 @@ function validateContact(contact) {
     if (!('Email' in contact)) return 'Email is missing';
     return '';
 }
+function validateBookmark(bookmark) {
+    if (!('Title' in bookmark)) return 'Title is missing';
+    if (!('Url' in bookmark)) return 'Url is missing';
+    if (!('Category' in bookmark)) return 'Category is missing';
+    return '';
+}
 async function handleContactsServiceRequest(req, res) {
     if (req.url.includes("/api/contacts")) {
         const contactsFilePath = "./contacts.json";
@@ -152,8 +158,134 @@ async function handleContactsServiceRequest(req, res) {
     return false;
 }
 
+async function handleBookmarksServiceRequest(req, res) {
+    if (req.url.includes("/api/bookmarks")) {
+        const bookmarksFilePath = "./bookmarks.json";
+        let bookmarksJSON = fs.readFileSync(bookmarksFilePath);
+        let bookmarks = JSON.parse(bookmarksJSON);
+        let validStatus = '';
+        let id = extract_Id_From_Request(req);
+        switch (req.method) {
+            case 'GET':
+                if (isNaN(id)) {
+                    res.writeHead(200, { 'content-type': 'application/json' });
+                    res.end(bookmarksJSON);
+                } else {
+                    let found = false;
+                    for (let bookmark of bookmarks) {
+                        if (bookmark.Id === id) {
+                            found = true;
+                            res.writeHead(200, { 'content-type': 'application/json' });
+                            res.end(JSON.stringify(bookmark));
+                            break;
+                        }
+                    }
+                    if (!found) {
+                        res.writeHead(404);
+                        res.end(`Error : The bookmark of id ${id} does not exist`);
+                    }
+                }
+                break;
+            case 'POST':
+                let newBookmark = await getPayload(req);
+                validStatus = validateBookmark(newBookmark);
+                if (validStatus == '') {
+                    let maxId = 0;
+                    bookmarks.forEach(bookmark => {
+                        if (bookmark.Id > maxId)
+                            maxId = bookmark.Id;
+                    });
+                    newBookmark.Id = maxId + 1;
+                    bookmarks.push(newBookmark);
+                    fs.writeFileSync(bookmarksFilePath, JSON.stringify(bookmarks));
+                    res.writeHead(201, { 'content-type': 'application/json' });
+                    res.end(JSON.stringify(newBookmark));
+                } else {
+                    res.writeHead(400);
+                    res.end(`Error: ${validStatus}`);
+                }
+                break;
+            case 'PUT':
+                let modifiedBookmark = await getPayload(req);
+                validStatus = validateBookmark(modifiedBookmark);
+                if (validStatus == '') {
+                    if (!isNaN(id)) {
+                        if (!('Id' in modifiedBookmark)) modifiedBookmark.Id = id;
+                        if (modifiedBookmark.Id == id) {
+                            let storedBookmark = null;
+                            for (let bookmark of bookmarks) {
+                                if (bookmark.Id === id) {
+                                    storedBookmark = bookmark;
+                                    break;
+                                }
+                            }
+                            if (storedBookmark != null) {
+                                storedBookmark.Title = modifiedBookmark.Title;
+                                storedBookmark.Url = modifiedBookmark.Url;
+                                storedBookmark.Category = modifiedBookmark.Category;
+                                fs.writeFileSync(bookmarksFilePath, JSON.stringify(bookmarks));
+                                res.writeHead(200);
+                                res.end();
+                            } else {
+                                res.writeHead(404);
+                                res.end(`Error: The bookmark of id ${id} does not exist.`);
+                            }
+                        } else {
+                            res.writeHead(409);
+                            res.end(`Error: Conflict of id`);
+                        }
+                    } else {
+                        res.writeHead(400);
+                        res.end("Error : You must provide the id of bookmark to modify.");
+                    }
+                } else {
+                    res.writeHead(400);
+                    res.end(`Error: ${validStatus}`);
+                }
+                break;
+            case 'DELETE':
+                if (!isNaN(id)) {
+                    let index = 0;
+                    let oneDeleted = false;
+                    for (let bookmark of bookmarks) {
+                        if (bookmark.Id === id) {
+                            bookmarks.splice(index, 1);
+                            fs.writeFileSync(bookmarksFilePath, JSON.stringify(bookmarks));
+                            oneDeleted = true;
+                            break;
+                        }
+                        index++;
+                    }
+                    if (oneDeleted) {
+                        res.writeHead(204); // success no content
+                        res.end();
+                    } else {
+                        res.writeHead(404);
+                        res.end(`Error: The bookmark of id ${id} does not exist.`);
+                    }
+                } else {
+                    res.writeHead(400);
+                    res.end("Error : You must provide the id of bookmark to delete.");
+                }
+                break;
+            case 'PATCH':
+                res.writeHead(501);
+                res.end("Error: The endpoint PATCH api/bookmarks is not implemented.");
+                break;
+        }
+        return true;
+    }
+    return false;
+}
+
 function handleRequest(req, res) {
-    return handleContactsServiceRequest(req, res);
+    if (req.url.includes("/api/contacts")){
+        return handleContactsServiceRequest(req, res);
+    }
+    else if (req.url.includes("/api/bookmarks")){
+        return handleBookmarksServiceRequest(req, res);
+    }
+    
 }
 
 function getPayload(req) {
