@@ -18,7 +18,7 @@
     user-select: none;
     /* Non-prefixed version, currently
        supported by Chrome, Edge, Opera and Firefox */
-    cursor: pointer;
+    /* cursor: pointer; */
 }
 
 #main {
@@ -83,7 +83,7 @@
     display: grid;
     grid-template-columns: 4fr 1fr;
     align-items: top;
-    background-color: rgb(87, 140, 255);
+    background-color: rgb(224, 224, 224);
     border-radius: 6px;
 }
 
@@ -105,7 +105,7 @@
 }
 
 .bookmarkLayout {
-    display: grid;
+    display: block;
     grid-template-columns: 1fr;
     padding: 10px;
     gap: 8px;
@@ -115,7 +115,7 @@
 .bookmarkTitle {
     font-size: 1.1rem;
     font-weight: bold;
-    color: white;
+    color: black;
 }
 
 .bookmarkUrl {
@@ -123,7 +123,7 @@
 }
 
 .bookmarkCategory {
-    color: white;
+    color: cornflowerblue;
 }
 
 .bookmarkCommandPanel {
@@ -147,7 +147,13 @@
 }
 
 .appLogo {
-    height: 40px;
+    height: 45px;
+}
+
+.appLogoForm {
+    height: 60px;
+    margin-bottom: 15px;
+    display: block;
 }
 
 @media screen and (min-width:650px) {
