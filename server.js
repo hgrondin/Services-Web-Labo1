@@ -278,13 +278,11 @@ async function handleBookmarksServiceRequest(req, res) {
     return false;
 }
 
-function handleRequest(req, res) {
-    if (req.url.includes("/api/contacts")){
-        return handleContactsServiceRequest(req, res);
-    }
-    else if (req.url.includes("/api/bookmarks")){
-        return handleBookmarksServiceRequest(req, res);
-    }
+async function handleRequest(req, res) {
+    if (! await handleContactsServiceRequest(req, res))
+        if (! await handleBookmarksServiceRequest(req, res))
+            return false;
+    return true;
     
 }
 
@@ -306,7 +304,7 @@ const server = createServer(async (req, res) => {
     console.log(req.method, req.url);
     accessControlConfig(req, res);
     if (!CORS_Preflight(req, res))
-        if (!handleRequest(req, res)) {
+        if (!await handleRequest(req, res)) {
             res.writeHead(404);
             res.end();
         }
