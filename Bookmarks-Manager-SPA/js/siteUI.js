@@ -136,7 +136,7 @@ async function renderDeleteBookmarkForm(id) {
             showWaitingGif();
             let result = await API_DeleteBookmark(bookmark.Id);
             if (result)
-                renderBookmark();
+                renderBookmarks();
             else
                 renderError("Une erreur est survenue!");
         });

@@ -3,7 +3,7 @@
     "short_name": "Bookmarks Manager",
     "icons": [
         {
-            "src": "contact-logo.svg",
+            "src": "bookmark-logo.svg",
             "sizes": "any",
             "type": "image/svg+xml",
             "purpose": "any"
