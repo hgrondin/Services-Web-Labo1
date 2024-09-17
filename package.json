@@ -1,7 +1,7 @@
 {
   "name": "contacts-api",
   "version": "1.0.0",
-  "description": "Démo d'un petit service API",
+  "description": "DLaboratoire 1 du cours de services web",
   "main": "server.js",
   "type":"module",
   "engines": {
@@ -11,6 +11,6 @@
     "test": "echo \"Error: no test specified\" && exit 1",
     "start":"node server.js"
   },
-  "author": "Nicolas Chourot",
+  "author": "Henri Grondin",
   "license": "ISC"
 }
